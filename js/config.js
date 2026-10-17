@@ -6,5 +6,5 @@ window.ECOSAC_CONFIG = {
   // PRODUCCIÓN (portal original; usar cuando se apliquen los 4 archivos al proyecto original):
   // API_URL: 'https://script.google.com/macros/s/AKfycbyFg-kGC9qF2BESPLfvA_l7GVI1lxTSdBX5YZFqH2S1joEoVJbOqcSFcfM8FUlNjLapsA/exec',
   REGISTRO_MANUAL_URL: 'https://script.google.com/macros/s/AKfycbzSmDbqiHWaCPmFz2DzT8W5fwHXacUtSABQgzNbf1_TDE0OPsW9MmY43wW3JAyl1ih6/exec',
-  VERSION: '1.1.0'
+  VERSION: '1.2.0'
 };

@@ -195,3 +195,5 @@ body { padding-bottom: env(safe-area-inset-bottom); }
 .qr-tramo-tag { font-size: 11px; }
 .qr-tramo-info { font-size: 11px; color: var(--gris-suave); line-height: 1.35; }
 .qr-pax { font-size: 15px; }
+.qr-prev .qr-img { width: 100%; max-width: 420px; display: block; margin: 0 auto; border-radius: 8px; }
+.qr-corte { border-top: 2px dashed #9aa5a0; margin: 14px 0; }

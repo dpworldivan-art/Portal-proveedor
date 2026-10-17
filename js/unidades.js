@@ -85,6 +85,8 @@
     return out;
   }
 
+  E.util = { descargar: descargar, crearPdf: crearPdf, aBytes: aBytes };
+
   function jpegDe(u) {
     var c = tarjetaQR(u);
     return { bytes: aBytes(c.toDataURL('image/jpeg', 0.92)), w: c.width, h: c.height };

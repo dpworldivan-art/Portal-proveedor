@@ -18,7 +18,7 @@
   function leerCacheProg() { try { return JSON.parse(lsGet('ecosac_prog') || 'null'); } catch (e) { return null; } }
 
   function mostrar(id) {
-    ['pantalla-login', 'pantalla-inicio', 'pantalla-prog', 'pantalla-unid', 'pantalla-sem'].forEach(function (p) { $(p).classList.toggle('activa', p === id); });
+    ['pantalla-login', 'pantalla-inicio', 'pantalla-prog', 'pantalla-unid', 'pantalla-sem', 'pantalla-qr'].forEach(function (p) { $(p).classList.toggle('activa', p === id); });
     window.scrollTo(0, 0);
   }
   function toast(msg, tipo) {
@@ -83,6 +83,13 @@
     if (sec) { SECC = sec; try { lsSet('ecosac_s', JSON.stringify(sec)); } catch (e) { /* ok */ } }
     else if (!SECC) { try { SECC = JSON.parse(lsGet('ecosac_s') || 'null'); } catch (e) { SECC = null; } }
     Object.keys(BOTONES).forEach(function (k) { $(BOTONES[k]).classList.toggle('oculto', !!SECC && SECC[k] === false); });
+  }
+  /* Recursos públicos (Genera tu QR): los decide la hoja Config (PUBLICO_GENERADOR_QR, QR_MENSAJE). Se recuerda lo último para que no parpadee. */
+  var PUB = { generadorQr: true, qrMensaje: 'Pegar en un lugar seguro donde no se moje.' };
+  function aplicarPublico(c) {
+    if (c) { PUB = { generadorQr: c.generadorQr !== false, qrMensaje: c.qrMensaje || PUB.qrMensaje }; try { lsSet('ecosac_pub', JSON.stringify(PUB)); } catch (e) { /* ok */ } }
+    else { try { var g = JSON.parse(lsGet('ecosac_pub') || 'null'); if (g) PUB = { generadorQr: g.generadorQr !== false, qrMensaje: g.qrMensaje || PUB.qrMensaje }; } catch (e) { /* ok */ } }
+    ['caja-qr-login', 'caja-qr-inicio'].forEach(function (id) { $(id).classList.toggle('oculto', !PUB.generadorQr); });
   }
   function seccionActiva(k) { return !SECC || SECC[k] !== false; }
 
@@ -400,7 +407,9 @@
     $('btn-contacto').addEventListener('click', contactar);
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') cerrarModal(); });
 
+    aplicarPublico(null);
     llamar('portalConfigPublica', [], function (c) {
+      aplicarPublico(c);
       CONTACTO = { numero: c.contactoNumero, nombre: c.contactoNombre, horario: c.contactoHorario };
       $('txt-contacto').textContent = c.contactoNombre || 'Coordinación';
       $('horario-login').textContent = c.contactoHorario ? 'Atención: ' + c.contactoHorario : '';
@@ -423,6 +432,7 @@
 
   window.ECOSAC = {
     lsGet: lsGet, lsSet: lsSet, aplicarSecciones: aplicarSecciones, llamar: llamar, el: el, toast: toast, abrirModal: abrirModal, cerrarModal: cerrarModal, mostrar: mostrar,
+    publico: function () { return PUB; }, hayToken: function () { return !!TOKEN; },
     token: function () { return TOKEN; }, contacto: function () { return CONTACTO; }
   };
   iniciar();
