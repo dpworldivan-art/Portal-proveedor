@@ -12,3 +12,6 @@
 - Precarga de Mi programación, Mis unidades y Resumen de la semana al abrir el inicio; las secciones abren al instante.
 - Secciones visibles según la hoja Config (SECCION_*). Requiere Config.gs y Api.gs nuevos.
 - sw.js VERSION = ecosac-pwa-1.1.0.
+
+## 1.2.0 (17-oct-2026)
+- Pantalla pública "Genera tu QR" (js/qr-publico.js), controlada por Config (PUBLICO_GENERADOR_QR, QR_MENSAJE).

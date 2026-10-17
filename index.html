@@ -43,6 +43,11 @@
         <p class="ayuda">¿No tienes clave, la olvidaste o tu cuenta está bloqueada?</p>
         <button type="button" id="btn-contacto" class="btn btn--secundario btn--sm" style="width:100%;margin-top:8px">Escribir a <span id="txt-contacto">Coordinación</span></button>
         <p class="ayuda" id="horario-login"></p>
+        <div id="caja-qr-login" class="caja caja--info oculto" style="margin-top:18px">
+          <b>Genera tu QR</b>
+          <p style="margin:6px 0 10px">Escribe tu placa y descarga el QR listo para imprimir.</p>
+          <button type="button" class="btn btn--secundario btn-abrir-qr">Generar QR</button>
+        </div>
       </form>
       <div class="pie">ECOSAC · PORTAL DE TRANSPORTES</div>
     </section>
@@ -73,6 +78,11 @@
           <p style="margin:6px 0 10px">Mientras pasamos al nuevo sistema, la liquidación se sigue haciendo de forma manual. Aquí puedes ver los viajes registrados manualmente.</p>
           <button type="button" id="btn-ir-manual" class="btn btn--secundario">Ir al registro manual</button>
         </div>
+        <div id="caja-qr-inicio" class="caja caja--info oculto" style="margin-top:14px">
+          <b>Genera tu QR</b>
+          <p style="margin:6px 0 10px">Escribe tu placa y descarga el QR listo para imprimir.</p>
+          <button type="button" class="btn btn--secundario btn-abrir-qr">Generar QR</button>
+        </div>
       </div>
       <div class="pie">ECOSAC · PORTAL DE TRANSPORTES</div>
     </section>
@@ -95,6 +105,30 @@
     </section>
 
     <!-- MIS UNIDADES -->
+    <!-- GENERA TU QR (público: no pide ingreso, no consulta ni guarda nada) -->
+    <section id="pantalla-qr" class="pantalla">
+      <div class="header header--chico">
+        <div class="header-barra"><button id="btn-qr-volver" type="button" class="btn-header">← Volver</button></div>
+        <h1>Genera tu QR</h1>
+        <p class="subtitulo">Solo escribe la placa</p>
+      </div>
+      <div class="contenido">
+        <div class="campo">
+          <label class="campo-label" for="input-placa-qr">Placa</label>
+          <input id="input-placa-qr" class="input-texto" type="text" maxlength="7" placeholder="ABC-123" autocomplete="off" autocapitalize="characters" spellcheck="false">
+          <p class="ayuda" style="text-align:left">Formato: 3 caracteres, guion, 3 caracteres.</p>
+        </div>
+        <div class="unid-acciones">
+          <button id="btn-qr-pdf" type="button" class="btn btn--primario btn--sm" disabled>Descargar PDF</button>
+          <button id="btn-qr-png" type="button" class="btn btn--secundario btn--sm" disabled>Descargar imagen</button>
+        </div>
+        <h3>Vista previa</h3>
+        <div id="qr-prev" class="qr-prev"><div class="vacio">Escribe la placa completa para ver el QR.</div></div>
+        <p class="ayuda">El PDF (A4) trae 2 tarjetas por hoja para imprimir y recortar. El QR contiene solo la placa.</p>
+      </div>
+      <div class="pie">ECOSAC · PORTAL DE TRANSPORTES</div>
+    </section>
+
     <section id="pantalla-unid" class="pantalla">
       <div class="header header--chico">
         <div class="header-barra"><button id="btn-unid-volver" type="button" class="btn-header">← Inicio</button><button id="btn-unid-actualizar" type="button" class="btn-header">Actualizar</button></div>
@@ -127,5 +161,6 @@
   <script src="js/unidades.js"></script>
   <script src="js/resumen.js"></script>
   <script src="js/contactos.js"></script>
+  <script src="js/qr-publico.js"></script>
 </body>
 </html>
