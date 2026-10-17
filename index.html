@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f5c3a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="ECOSAC">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>ECOSAC · Portal de Transportes</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <div id="app" class="app-movil">
+    <div id="spinner" class="spinner-capa" role="status" aria-live="polite"><div class="spinner"></div></div>
+    <div id="toast" class="toast oculto" role="alert"></div>
+
+    <!-- INGRESO -->
+    <section id="pantalla-login" class="pantalla activa">
+      <div class="header">
+        <div class="marca">TRANSPORTES · ECOSAC</div>
+        <h1>Portal de proveedores</h1>
+        <p class="subtitulo">Ingresa con tu RUC y tu clave</p>
+      </div>
+      <form class="contenido" id="form-login" autocomplete="off" novalidate>
+        <div class="campo">
+          <label class="campo-label" for="input-ruc">RUC de tu empresa</label>
+          <input id="input-ruc" class="input-texto" type="text" inputmode="numeric" maxlength="11" placeholder="11 dígitos" autocomplete="username">
+        </div>
+        <div class="campo">
+          <label class="campo-label" for="input-clave">Clave</label>
+          <div class="clave-wrap">
+            <input id="input-clave" class="input-texto input-clave" type="password" maxlength="8" placeholder="•••••" autocomplete="current-password" autocapitalize="characters" spellcheck="false">
+            <button type="button" id="btn-ver" class="btn-ver">Ver</button>
+          </div>
+        </div>
+        <div id="login-error" class="caja caja--error oculto" role="alert"></div>
+        <button id="btn-entrar" type="submit" class="btn btn--primario" disabled>ENTRAR</button>
+        <p class="ayuda">¿No tienes clave, la olvidaste o tu cuenta está bloqueada?</p>
+        <button type="button" id="btn-contacto" class="btn btn--secundario btn--sm" style="width:100%;margin-top:8px">Escribir a <span id="txt-contacto">Coordinación</span></button>
+        <p class="ayuda" id="horario-login"></p>
+      </form>
+      <div class="pie">ECOSAC · PORTAL DE TRANSPORTES</div>
+    </section>
+
+    <!-- INICIO (los módulos siguientes se conectan aquí) -->
+    <section id="pantalla-inicio" class="pantalla">
+      <div class="header">
+        <div class="header-barra"><button id="btn-salir" type="button" class="btn-header">Salir</button></div>
+        <div class="marca">Bienvenido</div>
+        <h1 id="txt-empresa">Empresa</h1>
+        <p class="subtitulo">Portal de transportes ECOSAC</p>
+      </div>
+      <div class="contenido">
+        <button type="button" id="btn-ir-prog" class="tarjeta tarjeta--accion"><div><b>Mi programación</b><span>Valida tus viajes del día</span></div><span id="etq-prog" class="etiqueta etiqueta--ok">Abrir</span></button>
+        <button type="button" id="btn-ir-unid" class="tarjeta tarjeta--accion"><div><b>Mis unidades</b><span>Placas, disponibilidad y QR</span></div><span class="etiqueta etiqueta--ok">Abrir</span></button>
+        <button type="button" id="btn-ir-sem" class="tarjeta tarjeta--accion"><div><b>Resumen de la semana</b><span>Tus viajes de lunes a domingo</span></div><span class="etiqueta etiqueta--ok">Abrir</span></button>
+        <button type="button" id="btn-ir-cont" class="tarjeta tarjeta--accion"><div><b>Contactos de la empresa</b><span>Números de dueños para avisos</span></div><span class="etiqueta etiqueta--ok">Editar</span></button>
+        <div id="caja-instalar" class="caja caja--instalar oculto">
+          <b>Instala la app</b>
+          <p id="txt-instalar" style="margin:6px 0 10px"></p>
+          <div class="unid-acciones" style="margin:0">
+            <button type="button" id="btn-instalar" class="btn btn--primario btn--sm">Instalar</button>
+            <button type="button" id="btn-no-instalar" class="btn btn--secundario btn--sm">Ahora no</button>
+          </div>
+        </div>
+        <div class="caja caja--info" style="margin-top:18px">
+          <b>Registro manual de viajes</b>
+          <p style="margin:6px 0 10px">Mientras pasamos al nuevo sistema, la liquidación se sigue haciendo de forma manual. Aquí puedes ver los viajes registrados manualmente.</p>
+          <button type="button" id="btn-ir-manual" class="btn btn--secundario">Ir al registro manual</button>
+        </div>
+      </div>
+      <div class="pie">ECOSAC · PORTAL DE TRANSPORTES</div>
+    </section>
+
+    <!-- MI PROGRAMACIÓN -->
+    <section id="pantalla-prog" class="pantalla">
+      <div class="header header--chico">
+        <div class="header-barra"><button id="btn-prog-volver" type="button" class="btn-header">← Inicio</button><button id="btn-prog-actualizar" type="button" class="btn-header">Actualizar</button></div>
+        <h1>Mi programación</h1>
+        <p class="subtitulo" id="prog-sub"></p>
+      </div>
+      <div class="contenido">
+        <div id="prog-dias" class="chips" role="tablist"></div>
+        <div id="prog-banner" class="caja oculto"></div>
+        <div id="prog-acciones"></div>
+        <div id="prog-lista"></div>
+        <div id="prog-vacio" class="vacio oculto">No hay programación publicada para ti por ahora. La programación del día siguiente se publica a las 3:00 p. m.</div>
+      </div>
+      <div class="pie">ECOSAC · PORTAL DE TRANSPORTES</div>
+    </section>
+
+    <!-- MIS UNIDADES -->
+    <section id="pantalla-unid" class="pantalla">
+      <div class="header header--chico">
+        <div class="header-barra"><button id="btn-unid-volver" type="button" class="btn-header">← Inicio</button><button id="btn-unid-actualizar" type="button" class="btn-header">Actualizar</button></div>
+        <h1>Mis unidades</h1>
+        <p class="subtitulo" id="unid-sub"></p>
+      </div>
+      <div class="contenido">
+        <div id="unid-tabs" class="chips" role="tablist"></div>
+        <div id="unid-cont"></div>
+      </div>
+      <div class="pie">ECOSAC · PORTAL DE TRANSPORTES</div>
+    </section>
+
+    <!-- RESUMEN DE LA SEMANA -->
+    <section id="pantalla-sem" class="pantalla">
+      <div class="header header--chico">
+        <div class="header-barra"><button id="btn-sem-volver" type="button" class="btn-header">← Inicio</button><button id="btn-sem-actualizar" type="button" class="btn-header">Actualizar</button></div>
+        <h1>Resumen de la semana</h1>
+        <p class="subtitulo" id="sem-sub"></p>
+      </div>
+      <div class="contenido"><div id="sem-cont"></div></div>
+      <div class="pie">ECOSAC · PORTAL DE TRANSPORTES</div>
+    </section>
+
+    <div id="modal-capa" class="modal-capa oculto"><div class="modal" id="modal" role="dialog" aria-modal="true"></div></div>
+  </div>
+  <script src="js/config.js"></script>
+  <script src="js/qr.js"></script>
+  <script src="js/portal.js"></script>
+  <script src="js/unidades.js"></script>
+  <script src="js/resumen.js"></script>
+  <script src="js/contactos.js"></script>
+</body>
+</html>
