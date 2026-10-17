@@ -4,7 +4,7 @@
   'use strict';
   var CONF = window.ECOSAC_CONFIG || {};
   var $ = function (id) { return document.getElementById(id); };
-  var TOKEN = '';
+  var SECC = null, TOKEN = '';
   var CONTACTO = { numero: '', nombre: 'Coordinación', horario: '' };
   var tToast = null;
   var PROG = null, DIA_SEL = '';
@@ -51,7 +51,7 @@
   }
 
   function cerrarLocal(aviso) {
-    TOKEN = ''; guardarToken(''); lsSet('ecosac_n', ''); PROG = null; DIA_SEL = ''; guardarCacheProg();
+    TOKEN = ''; guardarToken(''); lsSet('ecosac_n', ''); PROG = null; DIA_SEL = ''; guardarCacheProg(); SECC = null; ['ecosac_s', 'ecosac_unid', 'ecosac_sem'].forEach(function (k) { lsSet(k, ''); });
     try { $('modal-capa').classList.add('oculto'); } catch (e) { /* ok */ }
     $('input-clave').value = '';
     mostrar('pantalla-login');
@@ -73,14 +73,31 @@
       $('input-clave').value = ''; validar();
       if (!r || !r.ok) { mostrarError((r && r.mensaje) || 'No se pudo ingresar.'); return; }
       TOKEN = r.token; guardarToken(TOKEN); lsSet('ecosac_n', r.nombre || '');
-      abrirInicio(r.nombre);
+      abrirInicio(r.nombre, r.secciones);
     }, function (m) { validar(); mostrarError(m); });
   }
 
-  function abrirInicio(nombre) {
+  /* Secciones visibles (las decide la hoja Config: SECCION_*). Si el servidor no las informa, todas se ven. */
+  var BOTONES = { prog: 'btn-ir-prog', unid: 'btn-ir-unid', sem: 'btn-ir-sem', cont: 'btn-ir-cont' };
+  function aplicarSecciones(sec) {
+    if (sec) { SECC = sec; try { lsSet('ecosac_s', JSON.stringify(sec)); } catch (e) { /* ok */ } }
+    else if (!SECC) { try { SECC = JSON.parse(lsGet('ecosac_s') || 'null'); } catch (e) { SECC = null; } }
+    Object.keys(BOTONES).forEach(function (k) { $(BOTONES[k]).classList.toggle('oculto', !!SECC && SECC[k] === false); });
+  }
+  function seccionActiva(k) { return !SECC || SECC[k] !== false; }
+
+  /** Al abrir el inicio se piden en segundo plano las secciones activas, para que al tocarlas ya estén listas. */
+  function precargar() {
+    (window.ECOSAC_PRECARGA || []).forEach(function (f) { try { f(); } catch (e) { /* ok */ } });
+    if (seccionActiva('prog')) cargarProg(false);
+  }
+
+  function abrirInicio(nombre, secciones) {
     $('txt-empresa').textContent = nombre || 'Tu empresa';
+    aplicarSecciones(secciones);
     mostrar('pantalla-inicio');
     mostrarInstalar();
+    precargar();
   }
 
   function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt !== undefined && txt !== null) e.textContent = txt; return e; }
@@ -94,7 +111,11 @@
 
   /* =================== MI PROGRAMACIÓN =================== */
 
-  function abrirProg() { mostrar('pantalla-prog'); cargarProg(true); }
+  function abrirProg() {
+    mostrar('pantalla-prog');
+    if (PROG) { elegirDiaPorDefecto(); $('prog-sub').textContent = PROG.empresa || ''; pintarProg(); cargarProg(false); }   // ya precargada: se ve al instante y se refresca en silencio
+    else cargarProg(true);
+  }
 
   function elegirDiaPorDefecto() {
     var dias = PROG.dias.map(function (d) { return d.dia; });
@@ -388,7 +409,7 @@
     var t = leerToken();
     if (t) {
       TOKEN = t;
-      llamar('portalSesion', [t], function (r) { if (r && r.ok) { lsSet('ecosac_n', r.nombre || ''); abrirInicio(r.nombre); } else cerrarLocal(''); }, function (m) {
+      llamar('portalSesion', [t], function (r) { if (r && r.ok) { lsSet('ecosac_n', r.nombre || ''); abrirInicio(r.nombre, r.secciones); } else cerrarLocal(''); }, function (m) {
         // sin señal NO se cierra la sesión: se entra con lo último guardado y se avisa
         if (/^Sin conexión/.test(m) && lsGet('ecosac_n')) { abrirInicio(lsGet('ecosac_n')); toast('Sin conexión: se mostrará lo último guardado.', 'error'); }
         else cerrarLocal('');
@@ -401,7 +422,7 @@
   }
 
   window.ECOSAC = {
-    llamar: llamar, el: el, toast: toast, abrirModal: abrirModal, cerrarModal: cerrarModal, mostrar: mostrar,
+    lsGet: lsGet, lsSet: lsSet, aplicarSecciones: aplicarSecciones, llamar: llamar, el: el, toast: toast, abrirModal: abrirModal, cerrarModal: cerrarModal, mostrar: mostrar,
     token: function () { return TOKEN; }, contacto: function () { return CONTACTO; }
   };
   iniciar();

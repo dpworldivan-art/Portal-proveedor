@@ -7,3 +7,8 @@
 - Resumen semanal: tarjeta por placa con cuadros IDA/VUELTA (leído/no leído, hora, tranquera); pasajeros solo el número.
 - Aviso a Coordinación: botón único al encargado de guardia por hora de Lima (Config: TURNO_DIA_INICIO / TURNO_NOCHE_INICIO); el mensaje lleva todos los viajes del día.
 - Requiere Apps Script actualizado (doPost + guardia). Ver LEEME.md.
+
+## 1.1.0 (17-oct-2026)
+- Precarga de Mi programación, Mis unidades y Resumen de la semana al abrir el inicio; las secciones abren al instante.
+- Secciones visibles según la hoja Config (SECCION_*). Requiere Config.gs y Api.gs nuevos.
+- sw.js VERSION = ecosac-pwa-1.1.0.

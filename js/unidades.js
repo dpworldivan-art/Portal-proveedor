@@ -110,14 +110,23 @@
 
   /* =================== Datos y pantallas =================== */
 
-  function abrir() { E.mostrar('pantalla-unid'); cargar(true); }
+  function leerCache() { try { return JSON.parse(E.lsGet('ecosac_unid') || 'null'); } catch (e) { return null; } }
+  function abrir() {
+    E.mostrar('pantalla-unid');
+    if (!U) { var c = leerCache(); if (c && c.unidades) { U = c; preparar(); } }
+    if (U) { pintar(); cargar(false); } else cargar(true);   // lo último visto aparece al instante; se actualiza en silencio
+  }
+  function preparar() {
+    var dias = U.dias.map(function (d) { return d.dia; });
+    if (dias.indexOf(DIA) < 0) DIA = dias[dias.length - 1];
+    $('unid-sub').textContent = U.unidades.length + (U.unidades.length === 1 ? ' unidad' : ' unidades') + ' en la lista oficial';
+  }
+  (window.ECOSAC_PRECARGA = window.ECOSAC_PRECARGA || []).push(function () { cargar(false); });
 
   function cargar(conSpinner) {
     E.llamar('unidObtener', [E.token()], function (r) {
-      U = r;
-      var dias = r.dias.map(function (d) { return d.dia; });
-      if (dias.indexOf(DIA) < 0) DIA = dias[dias.length - 1];
-      $('unid-sub').textContent = r.unidades.length + (r.unidades.length === 1 ? ' unidad' : ' unidades') + ' en la lista oficial';
+      U = r; preparar();
+      try { E.lsSet('ecosac_unid', JSON.stringify(r)); } catch (e) { /* ok */ }
       pintar();
     }, null, !conSpinner);
   }

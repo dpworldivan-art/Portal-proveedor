@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var E = window.ECOSAC, $ = function (id) { return document.getElementById(id); }, el = E.el;
-  var OFFSET = 0, ABIERTOS = {};
+  var OFFSET = 0, ABIERTOS = {}, MEM = {};
   var ETQ_TRAMO = { LEIDO: ['QR leído', 'tag tag--ok'], NO_LEIDO: ['QR no leído', 'tag tag--mal'], PENDIENTE: ['Pendiente', 'tag tag--pend'], SIN_DATOS: ['Lectura por actualizar', 'tag tag--pend'] };
   var ETQ_VIAJE = {
     COMPLETO: ['QR completo', 'tag tag--ok'], INCOMPLETO: ['QR incompleto', 'tag tag--pend'], SIN_LECTURA: ['QR no leído', 'tag tag--mal'],
@@ -82,8 +82,21 @@
     return caja;
   }
 
-  function cargar() {
-    E.llamar('resumenSemana', [E.token(), OFFSET], function (r) {
+  function leerCache() { try { return JSON.parse(E.lsGet('ecosac_sem') || 'null'); } catch (e) { return null; } }
+  function cargar(silencioso) {
+    var off = OFFSET;
+    var previo = MEM[off] || (off === 0 ? leerCache() : null);
+    if (previo && previo.totales && silencioso !== true && silencioso !== 'manual') { MEM[off] = previo; pintar(previo); silencioso = true; }   // se ve al instante lo último guardado
+    E.llamar('resumenSemana', [E.token(), off], function (r) {
+      MEM[off] = r;
+      if (off === 0) { try { E.lsSet('ecosac_sem', JSON.stringify(r)); } catch (e) { /* ok */ } }
+      if (off === OFFSET) pintar(r);
+    }, null, silencioso === true);
+  }
+  (window.ECOSAC_PRECARGA = window.ECOSAC_PRECARGA || []).push(function () { var o = OFFSET; OFFSET = 0; cargar(true); OFFSET = o; });
+
+  function pintar(r) {
+    {
       $('sem-sub').textContent = r.titulo;
       var cont = $('sem-cont'); cont.textContent = '';
       var nav = el('div', 'unid-acciones');
@@ -112,10 +125,10 @@
           d.viajes.forEach(function (v) { c.appendChild(viajeCaja(v, d.dia + '|' + v.placa + '|' + v.turno + '|' + v.solicitud)); });
         }));
       });
-    });
+    }
   }
 
   $('btn-ir-sem').addEventListener('click', function () { OFFSET = 0; E.mostrar('pantalla-sem'); cargar(); });
   $('btn-sem-volver').addEventListener('click', function () { E.mostrar('pantalla-inicio'); });
-  $('btn-sem-actualizar').addEventListener('click', cargar);
+  $('btn-sem-actualizar').addEventListener('click', function () { cargar('manual'); });
 })();
