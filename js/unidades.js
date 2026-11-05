@@ -414,8 +414,7 @@
       cargar(false);
       var c = E.contacto(), ok = el('button', 'btn btn--primario', 'Listo');
       ok.type = 'button'; ok.addEventListener('click', E.cerrarModal);
-      var nodos = [el('h3', null, 'Solicitud enviada')Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
-        Claude-Session: https://claude.ai/code/session_01BgFMnRwBMyMSrH8Yv9eqgg, el('p', null, NOMBRE_SOL[tipo] + ' · placa ' + r.placa + ': solicitud registrada como Pendiente. ECOSAC la revisará.')];
+      var nodos = [el('h3', null, 'Solicitud enviada'), el('p', null, NOMBRE_SOL[tipo] + ' · placa ' + r.placa + ': solicitud registrada como Pendiente. ECOSAC la revisará.')];
       if (c.numero) {
         var wa = el('button', 'btn btn--secundario', 'Avisar a Coordinación por WhatsApp'); wa.type = 'button';
         wa.addEventListener('click', function () {
