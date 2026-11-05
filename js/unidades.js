@@ -128,9 +128,13 @@
   function cargar(conSpinner) {
     E.llamar('unidObtener', [E.token()], function (r) {
       U = r; preparar();
-      try { E.lsSet('ecosac_unid', JSON.stringify(r)); } catch (e) { /* ok */ }
+      guardarCache();
       pintar();
     }, null, !conSpinner);
+  }
+  /** Lo último visto se guarda en el teléfono SIN los datos personales del conductor (nombre, celular, DNI). */
+  function guardarCache() {
+    try { E.lsSet('ecosac_unid', JSON.stringify(U, function (k, v) { return k === 'conductor' ? undefined : v; })); } catch (e) { /* ok */ }
   }
 
   function pintar() {
@@ -177,11 +181,71 @@
       cab.appendChild(el('span', 'placa', u.placa)); cab.appendChild(el('span', 'esp'));
       t.appendChild(cab);
       t.appendChild(el('div', 'viaje-det', [u.tipo || 'Tipo no registrado', u.cap ? 'Capacidad ' + u.cap : 'Capacidad no registrada'].join(' · ')));
+      var c = u.conductor;   // undefined = aún no cargado (la caché no guarda datos personales); null = sin conductor
+      t.appendChild(el('div', 'viaje-det', c ? 'Conductor: ' + c.nombre : (c === null ? 'Conductor: sin registrar' : 'Conductor: actualizando…')));
+      if (c) t.appendChild(el('div', 'viaje-det', 'Cel. ' + c.celular + ' · DNI ' + c.dni));
+      var fila = el('div', 'unid-acciones');
+      var cb = el('button', 'btn btn--secundario btn--sm', c ? 'Editar conductor' : '+ Agregar conductor'); cb.type = 'button';
+      cb.disabled = c === undefined;
+      cb.addEventListener('click', function () { dialogoConductor(u); });
       var q = el('button', 'btn btn--secundario btn--sm', 'Ver QR / descargar'); q.type = 'button';
       q.addEventListener('click', function () { verQR(u); });
-      t.appendChild(q);
+      fila.appendChild(cb); fila.appendChild(q);
+      t.appendChild(fila);
       lista.appendChild(t);
     });
+  }
+
+  /* ---- Conductor por unidad (un conductor por placa: nombre, celular y DNI) ---- */
+  function dialogoConductor(u) {
+    var c = u.conductor || {};
+    var nombre = el('input', 'input-texto'); nombre.type = 'text'; nombre.maxLength = 80; nombre.placeholder = 'Nombres y apellidos'; nombre.autocomplete = 'off'; nombre.value = c.nombre || '';
+    // Sin maxLength: así se puede pegar "+51 987 654 321" y el campo lo deja en 9 dígitos
+    var cel = el('input', 'input-texto'); cel.type = 'tel'; cel.inputMode = 'numeric'; cel.placeholder = '9 dígitos, ej. 987654321'; cel.autocomplete = 'off'; cel.value = c.celular || '';
+    cel.addEventListener('input', function () {
+      var d = cel.value.replace(/\D/g, '');
+      if (d.length > 9 && d.indexOf('51') === 0) d = d.slice(2);
+      cel.value = d.slice(0, 9);
+    });
+    var dni = el('input', 'input-texto'); dni.type = 'text'; dni.inputMode = 'numeric'; dni.placeholder = '8 dígitos'; dni.autocomplete = 'off'; dni.value = c.dni || '';
+    dni.addEventListener('input', function () { dni.value = dni.value.replace(/\D/g, '').slice(0, 8); });
+    var err = msgError(), ok = el('button', 'btn btn--primario', 'Guardar conductor'), no = el('button', 'btn btn--secundario', 'Cancelar');
+    ok.type = no.type = 'button';
+    no.addEventListener('click', E.cerrarModal);
+    [nombre, cel, dni].forEach(function (i) { i.addEventListener('input', function () { err.classList.add('oculto'); }); });
+    ok.addEventListener('click', function () {
+      var n = nombre.value.replace(/\s+/g, ' ').trim();
+      if (n.length < 5 || !/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ'. -]+$/.test(n)) { mostrarMsg(err, 'Escribe el nombre y apellido del conductor (solo letras).'); return; }
+      if (!/^9\d{8}$/.test(cel.value)) { mostrarMsg(err, 'El celular debe tener 9 dígitos y empezar con 9.'); return; }
+      if (!/^\d{8}$/.test(dni.value)) { mostrarMsg(err, 'El DNI debe tener 8 dígitos.'); return; }
+      ok.disabled = true;
+      E.llamar('condGuardar', [E.token(), u.placa, n, cel.value, dni.value], function (r) {
+        u.conductor = r.conductor;
+        guardarCache();
+        E.cerrarModal(); E.toast('Conductor guardado.'); pintar();
+      }, function (m) { ok.disabled = false; mostrarMsg(err, m); });
+    });
+    var nodos = [el('h3', null, 'Conductor de ' + u.placa), campo('Nombre completo', nombre), campo('Celular', cel), campo('DNI', dni),
+      el('p', 'ayuda', 'Los datos del conductor solo los ves tú y se guardan de forma restringida.'), err, ok];
+    if (u.conductor) {
+      var quitar = el('button', 'btn btn--secundario', 'Quitar conductor'); quitar.type = 'button';
+      quitar.addEventListener('click', function () { E.cerrarModal(); confirmarQuitar(u); });
+      nodos.push(quitar);
+    }
+    nodos.push(no);
+    E.abrirModal(nodos);
+  }
+
+  function confirmarQuitar(u) {
+    var si = el('button', 'btn btn--primario', 'Sí, quitar'), no = el('button', 'btn btn--secundario', 'No'); si.type = no.type = 'button';
+    no.addEventListener('click', E.cerrarModal);
+    si.addEventListener('click', function () {
+      si.disabled = true;
+      E.llamar('condQuitar', [E.token(), u.placa], function () {
+        u.conductor = null; guardarCache(); E.cerrarModal(); E.toast('Conductor quitado.'); pintar();
+      }, function (m) { si.disabled = false; E.toast(m, 'error'); });
+    });
+    E.abrirModal([el('h3', null, '¿Quitar el conductor?'), el('p', null, 'Se borrarán el nombre, el celular y el DNI de ' + u.conductor.nombre + ' para la placa ' + u.placa + '.'), si, no]);
   }
 
   /* ---- Disponibilidad ---- */
@@ -350,7 +414,8 @@
       cargar(false);
       var c = E.contacto(), ok = el('button', 'btn btn--primario', 'Listo');
       ok.type = 'button'; ok.addEventListener('click', E.cerrarModal);
-      var nodos = [el('h3', null, 'Solicitud enviada'), el('p', null, NOMBRE_SOL[tipo] + ' · placa ' + r.placa + ': solicitud registrada como Pendiente. ECOSAC la revisará.')];
+      var nodos = [el('h3', null, 'Solicitud enviada')Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+        Claude-Session: https://claude.ai/code/session_01BgFMnRwBMyMSrH8Yv9eqgg, el('p', null, NOMBRE_SOL[tipo] + ' · placa ' + r.placa + ': solicitud registrada como Pendiente. ECOSAC la revisará.')];
       if (c.numero) {
         var wa = el('button', 'btn btn--secundario', 'Avisar a Coordinación por WhatsApp'); wa.type = 'button';
         wa.addEventListener('click', function () {
