@@ -15,3 +15,9 @@
 
 ## 1.2.0 (17-oct-2026)
 - Pantalla pública "Genera tu QR" (js/qr-publico.js), controlada por Config (PUBLICO_GENERADOR_QR, QR_MENSAJE).
+
+## 1.3.0 (5-nov-2026)
+- Mis unidades: un conductor por unidad (nombre, celular y DNI). Botones "Agregar / Editar conductor" y "Quitar conductor" (borra los datos).
+- Los datos del conductor se guardan en la hoja `Conductores` del archivo SENSIBLE (no en el libro principal) y no se guardan en la caché del teléfono.
+- Requiere Apps Script con `Conductores.gs` y las funciones `condGuardar` / `condQuitar` en `Api.gs` (RUTAS_PWA_), implementado como Versión nueva.
+- sw.js VERSION = ecosac-pwa-1.3.0.
